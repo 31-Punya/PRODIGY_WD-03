@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #2ab785, #d4bfe6);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        nav {
+            width: 100%;
+            background: #333;
+            padding: 10px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        nav ul li {
+            margin: 0 15px;
+        }
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
+        nav ul li a:hover {
+            color: #fda085;
+        }
+        .container {
+            margin-top: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .board {
+            display: inline-block;
+            border-collapse: collapse;
+            border: 5px solid #333;
+            border-radius: 10px;
+            background-color: #444;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            margin-top: 20px;
+        }
+        .board td {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #555;
+            font-size: 50px;
+            cursor: pointer;
+            text-align: center;
+            color: #f4f4f9;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .board td:hover {
+            background-color: #666;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Added shadow on hover */
+        }
+        .cell {
+            line-height: 100px;
+        }
+        .cell:hover {
+            transform: scale(1.1);
+        }
+        .playerX {
+            color: #ff4c4c; 
+        }
+        .playerO {
+            color: #4c9aff; 
+        }
+        button {
+            margin-top: 20px;
+            padding: 15px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Added shadow on hover */
+        }
+        /* Additional Styles */
+        @keyframes scale {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        .animated {
+            animation: scale 0.5s ease-in-out;
+        }
+        .animated-alert {
+            color: #ff4c4c;
+            font-size: 24px;
+            font-weight: bold;
+            animation: scale 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="HomePage-task3.html">Home</a></li>
+            <li><a href="GuidelinesPage-task3.html">Guidelines</a></li>
+            <li><a href="AboutPage-task3.html">About</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h1>Welcome to Tic Tac Toe</h1>
+        <p>Unleash your strategic powers in the classic game of Tic Tac Toe!</p>
+        <p>Test your skills against a friend and claim victory!</p>
+    </div>
+    
+    <h1>Tic Tac Toe</h1>
+    <div>
+        <input type="radio" id="playWithFriend" name="opponent" value="friend" checked>
+        <label for="playWithFriend">Play with Friend</label>
+        <input type="radio" id="playWithAI" name="opponent" value="ai">
+        <label for="playWithAI">Play with AI</label>
+    </div>
+    <button onclick="startGame()">Start Game</button>
+    
+    <table class="board" id="board" style="display: none;">
+        <tr>
+            <td class="cell" data-row="0" data-col="0"></td>
+            <td class="cell" data-row="0" data-col="1"></td>
+            <td class="cell" data-row="0" data-col="2"></td>
+        </tr>
+        <tr>
+            <td class="cell" data-row="1" data-col="0"></td>
+            <td class="cell" data-row="1" data-col="1"></td>
+            <td class="cell" data-row="1" data-col="2"></td>
+        </tr>
+        <tr>
+            <td class="cell" data-row="2" data-col="0"></td>
+            <td class="cell" data-row="2" data-col="1"></td>
+            <td class="cell" data-row="2" data-col="2"></td>
+        </tr>
+    </table>
+    <button onclick="resetGame()" style="display: none;" id="resetButton">Restart Game</button>
+    </div>
+    <div class="copyright">
+        &copy; 2024 Tic Tac Toe. All rights reserved.
+    </div>
+    <script>
+        const cells = document.querySelectorAll('.cell');
+        let currentPlayer = 'X';
+        let gameOver = false;
+        let aiMode = false;
+
+        function startGame() {
+            const opponent = document.querySelector('input[name="opponent"]:checked').value;
+            aiMode = (opponent === 'ai');
+            document.getElementById('board').style.display = 'table';
+            document.getElementById('resetButton').style.display = 'block';
+            resetGame();
+        }
+
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleClick);
+        });
+
+        function handleClick() {
+            if (gameOver || this.textContent !== '') return;
+            this.textContent = currentPlayer;
+            this.classList.add(currentPlayer === 'X' ? 'playerX' : 'playerO');
+            this.classList.add('animated'); // Add animation class
+            if (checkWin()) {
+                setTimeout(() => {
+                    alert(currentPlayer + ' wins!');
+                    this.classList.add('animated-alert'); // Add alert animation class
+                }, 10);
+                gameOver = true;
+                return;
+            }
+            if (checkDraw()) {
+                setTimeout(() => alert('It\'s a draw!'), 10);
+                gameOver = true;
+                return;
+            }
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            if (aiMode && currentPlayer === 'O') {
+                setTimeout(makeAiMove, 500);
+            }
+        }
+        function makeAiMove() {
+            let bestScore = -Infinity;
+            let move;
+            for (let i = 0; i < cells.length; i++) {
+                if (cells[i].textContent === '') {
+                    cells[i].textContent = currentPlayer;
+                    const score = minimax(cells, 0, false);
+                    cells[i].textContent = '';
+                    if (score > bestScore) {
+                        bestScore = score;
+                        move = i;
+                    }
+                }
+            }
+            cells[move].textContent = currentPlayer;
+            cells[move].classList.add(currentPlayer === 'X' ? 'playerX' : 'playerO');
+            cells[move].classList.add('animated'); // Add animation class
+            if (checkWin()) {
+                setTimeout(() => {
+                    alert(currentPlayer + ' wins!');
+                    cells[move].classList.add('animated-alert'); // Add alert animation class
+                }, 10);
+                gameOver = true;
+                return;
+            }
+            if (checkDraw()) {
+                setTimeout(() => alert('It\'s a draw!'), 10);
+                gameOver = true;
+                return;
+            }
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        }
+
+        function checkWin() {
+            const winningCombos = [
+                ['00', '01', '02'], ['10', '11', '12'], ['20', '21', '22'],
+                ['00', '10', '20'], ['01', '11', '21'], ['02', '12', '22'],
+                ['00', '11', '22'], ['02', '11', '20']
+            ];
+            return winningCombos.some(combo => {
+                const [a, b, c] = combo;
+                const cellA = document.querySelector(`[data-row="${a[0]}"][data-col="${a[1]}"]`).textContent;
+                const cellB = document.querySelector(`[data-row="${b[0]}"][data-col="${b[1]}"]`).textContent;
+                const cellC = document.querySelector(`[data-row="${c[0]}"][data-col="${c[1]}"]`).textContent;
+                return cellA && cellA === cellB && cellA === cellC;
+            });
+        }
+
+        function checkDraw() {
+            return [...cells].every(cell => cell.textContent !== '');
+        }
+
+        function resetGame() {
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('playerX', 'playerO');
+            });
+            currentPlayer = 'X';
+            gameOver = false;
+        }
+
+        function minimax(cells, depth, isMaximizing) {
+            const scores = {
+                X: 1,
+                O: -1,
+                tie: 0
+            };
+
+            if (checkWin()) {
+                return scores[currentPlayer];
+            }
+
+            if (checkDraw()) {
+                return scores.tie;
+            }
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < cells.length; i++) {
+                    if (cells[i].textContent === '') {
+                        cells[i].textContent = 'X';
+                        const score = minimax(cells, depth + 1, false);
+                        cells[i].textContent = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < cells.length; i++) {
+                    if (cells[i].textContent === '') {
+                        cells[i].textContent = 'O';
+                        const score = minimax(cells, depth + 1, true);
+                        cells[i].textContent = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+    </script>
+</body>
+</html>
